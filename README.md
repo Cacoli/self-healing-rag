@@ -75,19 +75,6 @@ python ingest.py
 python -m streamlit run app.py
 ```
 
-#  Project Structure
-self-healing-rag/
-├── src/
-│   ├── state.py          # Shared graph state definition
-│   ├── retriever.py      # Pinecone vector retrieval node
-│   ├── generator.py      # LLM answer generation node
-│   ├── critic.py         # Hallucination detection node
-│   ├── reformulator.py   # Query rewriting node
-│   └── graph.py          # LangGraph assembly
-├── app.py                # Streamlit web UI
-├── ingest.py             # Document ingestion script
-├── main.py               # CLI runner
-└── .env.example          # Environment variable template
 
 ## How the Critic Works
 
