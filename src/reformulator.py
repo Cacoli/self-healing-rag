@@ -6,9 +6,6 @@ import os
 
 load_dotenv()
 
-reformulator_llm = ChatGroq(model="llama-3.3-70b-versatile", api_key=os.getenv("GROQ_API_KEY"), temperature=0.3)
-
-
 REFORMULATION_PROMPT = """You are a search query optimizer. A previous search query failed to retrieve useful information to answer a question.
 
 ORIGINAL QUESTION from user:
@@ -31,28 +28,30 @@ Rules:
 
 
 def reformulate(state: RAGState) -> RAGState:
-    """
-    Node 4 — Reformulator
-    When the critic fails an answer, this node rewrites
-    the search query using the critic's reasoning as a hint.
-    """
+    load_dotenv()
+    reformulator_llm = ChatGroq(
+        model="llama-3.3-70b-versatile",
+        api_key=os.getenv("GROQ_API_KEY"),
+        temperature=0.7
+    )
+
     print(f"\n🔄 [REFORMULATOR] Retry {state['retry_count'] + 1}/{state['max_retries']}")
     print(f"   Failed query: '{state['current_query']}'")
 
     prompt = REFORMULATION_PROMPT.format(
-        original_query  = state["original_query"],
-        failed_query    = state["current_query"],
-        critic_reasoning= state["critic_reasoning"]
+        original_query   = state["original_query"],
+        failed_query     = state["current_query"],
+        critic_reasoning = state["critic_reasoning"]
     )
 
-    response     = reformulator_llm.invoke(prompt)
-    new_query    = response.content.strip()
+    response  = reformulator_llm.invoke(prompt)
+    new_query = response.content.strip()
 
     print(f"   New query:    '{new_query}'")
 
     return {
         **state,
-        "current_query": new_query,          # overwrite with new query
+        "current_query": new_query,
         "retry_count":   state["retry_count"] + 1,
-        "status":        RAGStatus.RETRIEVING # loop back to retriever
+        "status":        RAGStatus.RETRIEVING
     }
